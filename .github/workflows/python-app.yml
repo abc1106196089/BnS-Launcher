@@ -1,0 +1,39 @@
+# 此工作流将使用单一版本的 Python 安装依赖项、运行测试并进行代码检查
+# 有关更多信息，请参阅：https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+触发:
+  push:
+分支: [ "main" ]
+ 拉取请求:
+分支: [ "main" ]
+
+权限:
+ 内容: 阅读
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    步骤:
+    - 使用: actions/checkout@v4
+    - name: Set up Python 3.10
+      使用: actions/setup-python@v3
+      with:
+python-version: "3.10"
+    - 名称: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+如果存在 requirements.txt 文件，则执行 pip install -r requirements.txt；
+    - name: 使用 flake8 进行 lint 检查
+      run: |
+        # 如果存在 Python 语法错误或未定义的名称，则停止构建
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero 将所有错误视为警告。GitHub 编辑器的宽度为 127 个字符
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - 名称: 使用 pytest 进行测试
+      run: |
+        pytest
